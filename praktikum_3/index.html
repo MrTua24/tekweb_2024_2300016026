@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My-To-Do List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f5;
+            margin: 5px;
+            padding: 20px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 200px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 10px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+            background-color: white;
+            color: black;
+            margin: 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        
+        h2 {
+            font-size: 18px;
+            margin: 30px 0 10px;
+            text-align: center;
+        }
+
+        
+        #bgColorSelect {
+            padding: 8px;
+            font-size: 14px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        button.settings-btn {
+            padding: 8px 10px;
+            font-size: 14px;
+            margin: 5px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fff;
+            transition: background-color 0.3s;
+        }
+
+        button.settings-btn:hover {
+            background-color: #f0f0f0;
+        }
+
+        ul#taskList {
+            list-style-type: none;
+            padding: 0;
+            max-width: 400px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .task {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #fff;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .task p {
+            margin: 0;
+            cursor: pointer;
+            flex: 1;
+            font-size: 16px;
+        }
+
+        .task p.completed {
+            text-decoration: line-through;
+            color: grey;
+        }
+
+        
+        .delete-btn {
+            color: red;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            margin-left: 10px;
+        }
+
+        /* Mode Gelap */
+        body.dark-mode {
+            background-color: #333;
+            color: #f5f5f5;
+        }
+
+        .dark-mode .task {
+            background-color: #444;
+            border-color: #555;
+        }
+
+        .dark-mode button {
+            background-color: #666;
+            color: #f5f5f5;
+        }
+
+        .dark-mode button.settings-btn:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>My To-Do List</h1>
+    <input type="text" id="taskInput" placeholder="Add a new task...">
+    <button onclick="addTask()">Add</button>
+
+    <h2>Change Appearance</h2>
+    <select id="bgColorSelect" onchange="changeBackgroundColor()">
+        <option value="">Select Background Color</option>
+        <option value="white">White</option>
+        <option value="lightgrey">Light Grey</option>
+        <option value="lightblue">Light Blue</option>
+    </select>
+    <button onclick="increaseFontSize()">Increase Font Size</button>
+    <button onclick="decreaseFontSize()">Decrease Font Size</button>
+    <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+    <button onclick="changeFontStyle()">Change Font Style</button>
+
+    <ul id="taskList"></ul>
+
+    <script>
+        let isDarkMode = false;
+        let currentFontSize = 16;
+        let isSerifFont = false;
+
+        function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            const taskText = taskInput.value.trim();
+
+            if (taskText === "") return;
+
+            const taskItem = document.createElement('li');
+            taskItem.classList.add('task');
+
+            const taskPara = document.createElement('p');
+            taskPara.textContent = taskText;
+            taskPara.ondblclick = () => editTask(taskPara);
+            taskPara.onclick = () => markAsCompleted(taskPara);
+
+            const deleteBtn = document.createElement('span');
+            deleteBtn.textContent = 'X';
+            deleteBtn.classList.add('delete-btn');
+            deleteBtn.onclick = () => deleteTask(taskItem);
+
+            taskItem.appendChild(taskPara);
+            taskItem.appendChild(deleteBtn);
+            document.getElementById('taskList').appendChild(taskItem);
+
+            taskInput.value = ""; // Clear the input field
+        }
+
+        function deleteTask(taskElement) {
+            taskElement.remove();
+        }
+
+        function editTask(taskElement) {
+            const currentText = taskElement.textContent;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = currentText;
+            input.onkeydown = function (event) {
+                if (event.key === 'Enter') {
+                    taskElement.textContent = input.value;
+                    taskElement.ondblclick = () => editTask(taskElement);
+                    taskElement.onclick = () => markAsCompleted(taskElement);
+                    taskElement.parentNode.replaceChild(taskElement, input);
+                }
+            };
+            taskElement.parentNode.replaceChild(input, taskElement);
+            input.focus();
+        }
+
+        function markAsCompleted(taskElement) {
+            taskElement.classList.toggle('completed');
+        }
+
+        function changeBackgroundColor() {
+            const bgColorSelect = document.getElementById('bgColorSelect');
+            document.body.style.backgroundColor = bgColorSelect.value;
+        }
+
+        function increaseFontSize() {
+            currentFontSize += 2;
+            updateFontSize();
+        }
+
+        function decreaseFontSize() {
+            currentFontSize -= 2;
+            updateFontSize();
+        }
+
+        function updateFontSize() {
+            const elements = document.querySelectorAll("body, body *"); // Seleksi semua elemen di dalam body
+            elements.forEach(element => {
+                element.style.fontSize = currentFontSize + "px";
+            });
+        }
+
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            if (isDarkMode) {
+                document.body.style.backgroundColor = '#333';
+                document.body.style.color = '#fff';
+            } else {
+                document.body.style.backgroundColor = '';
+                document.body.style.color = '';
+            }
+        }
+
+        function changeFontStyle() {
+            isSerifFont = !isSerifFont;
+            document.body.style.fontFamily = isSerifFont ? 'serif' : 'sans-serif';
+        }
+
+    </script>
+</body>
+
+</html>
